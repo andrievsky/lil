@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gdamore/tcell/v2"
 	"github.com/mattn/go-runewidth"
 )
@@ -10,17 +9,8 @@ type View struct {
 	screen tcell.Screen
 }
 
-func NewView() (*View, error) {
-	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
-	screen, err := tcell.NewScreen()
-	if err != nil {
-		return nil, fmt.Errorf("can't create presenter screen: %w", err)
-	}
-	if err = screen.Init(); err != nil {
-		return nil, fmt.Errorf("can't create presenter screen: %w", err)
-	}
-	screen.Clear()
-	return &View{screen}, nil
+func NewView(screen tcell.Screen) *View {
+	return &View{screen}
 }
 
 func (v *View) List(list []ListItem) {
@@ -30,6 +20,10 @@ func (v *View) List(list []ListItem) {
 		emitStr(v.screen, 0, i, style, item.Label)
 	}
 	v.screen.Show()
+}
+
+func (v *View) Resize() {
+	v.screen.Sync()
 }
 
 func emitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
@@ -44,8 +38,4 @@ func emitStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
 		s.SetContent(x, y, c, comb, style)
 		x += w
 	}
-}
-
-func (v *View) Close() {
-	v.screen.Fini()
 }
