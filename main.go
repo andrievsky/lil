@@ -53,7 +53,7 @@ func main() {
 	}
 
 	go func() {
-		sigChan := make(chan os.Signal)
+		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, os.Kill, syscall.SIGTERM)
 		<-sigChan
 		close()
