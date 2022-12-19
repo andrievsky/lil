@@ -39,17 +39,11 @@ func main() {
 		panic("Can't create view: " + err.Error())
 	}
 
-	var lock sync.Mutex
-	var closed = false
-
+	var once sync.Once
 	close := func() {
-		lock.Lock()
-		if closed {
-			return
-		}
-		screen.Fini()
-		closed = true
-		lock.Unlock()
+		once.Do(func() {
+			screen.Fini()
+		})
 	}
 
 	go func() {
@@ -94,4 +88,9 @@ func readConfig() (Config, error) {
 		NewVaultClient(),
 		"secret/",
 	}, nil
+}
+
+func runOnce(f func()) {
+	var once sync.Once
+	once.Do(f)
 }
