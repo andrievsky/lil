@@ -89,8 +89,3 @@ func readConfig() (Config, error) {
 		"secret/",
 	}, nil
 }
-
-func runOnce(f func()) {
-	var once sync.Once
-	once.Do(f)
-}

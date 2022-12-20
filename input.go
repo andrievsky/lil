@@ -7,9 +7,13 @@ type InputEvent int
 const (
 	GoUp InputEvent = iota
 	GoDown
+	GoHome
+	GoEnd
+	GoPageUp
+	GoPageDown
 	GoBack
 	GoQuit
-	ResizeView
+	OnResize
 )
 
 type Input struct {
@@ -25,7 +29,7 @@ func (i *Input) PoolEvent() InputEvent {
 		event := i.screen.PollEvent()
 		switch event := event.(type) {
 		case *tcell.EventResize:
-			return ResizeView
+			return OnResize
 		case *tcell.EventKey:
 			switch event.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlC:
@@ -34,6 +38,14 @@ func (i *Input) PoolEvent() InputEvent {
 				return GoUp
 			case tcell.KeyDown:
 				return GoDown
+			case tcell.KeyHome:
+				return GoHome
+			case tcell.KeyEnd:
+				return GoEnd
+			case tcell.KeyPgUp:
+				return GoPageUp
+			case tcell.KeyPgDn:
+				return GoPageDown
 			case tcell.KeyBackspace, tcell.KeyBackspace2:
 				return GoBack
 			}
