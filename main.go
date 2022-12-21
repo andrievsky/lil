@@ -10,26 +10,14 @@ import (
 	"syscall"
 )
 
-type ListItem struct {
-	Label string
-	Path  string
-	Final bool
-}
-
 type Client interface {
-	List(string) ([]ListItem, error)
-	Get(string) (string, error)
-	HasParent(path string) bool
-	Parent(path string) string
-}
-
-type Config struct {
-	Client Client
-	Path   string
+	RootPath() Path
+	List(Path) ([]Path, error)
+	Get(Path) (Content, error)
 }
 
 func main() {
-	config, err := readConfig()
+	client, err := buildClient()
 	if err != nil {
 		panic("Can't read config: " + err.Error())
 	}
@@ -62,12 +50,10 @@ func main() {
 	}()
 	defer close()
 
-	client := config.Client
-	path := config.Path
 	view := NewView(screen)
 	input := NewInput(screen)
 	controller := NewListController(input, view, client)
-	err = controller.Run(path)
+	err = controller.Run()
 }
 
 func initScreen() (tcell.Screen, error) {
@@ -83,9 +69,7 @@ func initScreen() (tcell.Screen, error) {
 	return screen, nil
 }
 
-func readConfig() (Config, error) {
-	return Config{
-		NewVaultClient(),
-		"secret/",
-	}, nil
+func buildClient() (Client, error) {
+	client, err := NewVaultClient("secret/")
+	return client, err
 }

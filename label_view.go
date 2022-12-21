@@ -41,6 +41,10 @@ func (l *LabelView) Select(selected bool) {
 	l.update()
 }
 
+func (l *LabelView) Clear() {
+	l.view.DrawLabel(l.x, l.y, l.width, tcell.StyleDefault, nil)
+}
+
 func (l *LabelView) update() {
 	l.view.DrawLabel(l.x, l.y, l.ViewSize.width, l.style(), l.displayText)
 }

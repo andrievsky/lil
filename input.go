@@ -11,6 +11,7 @@ const (
 	GoEnd
 	GoPageUp
 	GoPageDown
+	GoForward
 	GoBack
 	GoQuit
 	OnResize
@@ -46,7 +47,9 @@ func (i *Input) PoolEvent() InputEvent {
 				return GoPageUp
 			case tcell.KeyPgDn:
 				return GoPageDown
-			case tcell.KeyBackspace, tcell.KeyBackspace2:
+			case tcell.KeyEnter, tcell.KeyRight:
+				return GoForward
+			case tcell.KeyLeft, tcell.KeyBackspace, tcell.KeyBackspace2:
 				return GoBack
 			}
 			switch event.Rune() {
