@@ -52,7 +52,7 @@ func main() {
 
 	view := NewView(screen)
 	input := NewInput(screen)
-	controller := NewListController(input, view, client)
+	controller := NewController(input, view, client)
 	err = controller.Run()
 }
 

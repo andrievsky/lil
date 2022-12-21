@@ -4,7 +4,17 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
-type View struct {
+type View interface {
+	RenderAll()
+	Render()
+	Size() (int, int)
+	Clear()
+	DrawLabel(x, y, maxWidth int, style tcell.Style, text []rune)
+	ClearArea(x, y, width, height int)
+	DrawText(x1, y1, x2, y2 int, style tcell.Style, text string)
+}
+
+type ViewImpl struct {
 	screen tcell.Screen
 }
 
@@ -18,23 +28,27 @@ type ViewSize struct {
 	height int
 }
 
-func NewView(screen tcell.Screen) *View {
-	return &View{screen: screen}
+func NewView(screen tcell.Screen) View {
+	return &ViewImpl{screen: screen}
 }
 
-func (v *View) RenderAll() {
+func (v *ViewImpl) RenderAll() {
 	v.screen.Sync()
 }
 
-func (v *View) Render() {
+func (v *ViewImpl) Render() {
 	v.screen.Show()
 }
 
-func (v *View) Clear() {
+func (v *ViewImpl) Size() (int, int) {
+	return v.screen.Size()
+}
+
+func (v *ViewImpl) Clear() {
 	v.screen.Clear()
 }
 
-func (v *View) DrawLabel(x, y, maxWidth int, style tcell.Style, text []rune) {
+func (v *ViewImpl) DrawLabel(x, y, maxWidth int, style tcell.Style, text []rune) {
 	if len(text) > maxWidth {
 		text = text[:maxWidth]
 	}
@@ -46,7 +60,15 @@ func (v *View) DrawLabel(x, y, maxWidth int, style tcell.Style, text []rune) {
 	}
 }
 
-func (v *View) DrawText(x1, y1, x2, y2 int, style tcell.Style, text string) {
+func (v *ViewImpl) ClearArea(x, y, width, height int) {
+	for i := 0; i < width; i++ {
+		for j := 0; j < height; j++ {
+			v.screen.SetContent(x+i, y+j, ' ', nil, tcell.StyleDefault)
+		}
+	}
+}
+
+func (v *ViewImpl) DrawText(x1, y1, x2, y2 int, style tcell.Style, text string) {
 	row := y1
 	col := x1
 	for _, r := range []rune(text) {

@@ -1,7 +1,7 @@
 package main
 
 type ListView struct {
-	view *View
+	view View
 	ViewPosition
 	ViewSize
 	labelViews    []*LabelView
@@ -9,7 +9,7 @@ type ListView struct {
 	selectedIndex int
 }
 
-func NewListView(view *View, x, y, width, height int) *ListView {
+func NewListView(view View, x, y, width, height int) *ListView {
 	return &ListView{
 		view,
 		ViewPosition{x, y},
@@ -51,7 +51,7 @@ func (l *ListView) SelectNext(step int) {
 	l.Select(nextIndex)
 }
 
-func (l *ListView) SelectedItem() Path {
+func (l *ListView) Selected() Path {
 	return l.sourceItems[l.selectedIndex]
 }
 

@@ -5,7 +5,7 @@ import "github.com/gdamore/tcell/v2"
 const truncatedLabelSuffix = "..."
 
 type LabelView struct {
-	view        *View
+	view        View
 	displayText []rune
 	text        string
 	selected    bool
@@ -13,7 +13,7 @@ type LabelView struct {
 	ViewSize
 }
 
-func NewLabelView(view *View, text string, selected bool, x, y, maxWidth int) *LabelView {
+func NewLabelView(view View, text string, selected bool, x, y, maxWidth int) *LabelView {
 	label := &LabelView{
 		view,
 		formatText(text, maxWidth),
@@ -42,7 +42,11 @@ func (l *LabelView) Select(selected bool) {
 }
 
 func (l *LabelView) Clear() {
-	l.view.DrawLabel(l.x, l.y, l.width, tcell.StyleDefault, nil)
+	if l.selected {
+		l.view.ClearArea(l.x, l.y, l.width, l.height)
+		return
+	}
+	l.view.ClearArea(l.x, l.y, len(l.displayText), l.height)
 }
 
 func (l *LabelView) update() {
