@@ -72,6 +72,11 @@ func (v *ViewImpl) DrawText(x1, y1, x2, y2 int, style tcell.Style, text string) 
 	row := y1
 	col := x1
 	for _, r := range []rune(text) {
+		if r == '\n' {
+			row++
+			col = x1
+			continue
+		}
 		v.screen.SetContent(col, row, r, nil, style)
 		col++
 		if col >= x2 {

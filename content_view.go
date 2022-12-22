@@ -19,14 +19,29 @@ func NewContentView(view View, x, y, width, height int) *ContentView {
 }
 
 func (c *ContentView) Set(content Content) {
-	c.content = content
-	c.Clear()
 	if c.content == nil {
-		return
+		if content == nil {
+			return
+		}
+	} else {
+		if content != nil && content == c.content {
+			return
+		}
 	}
-	c.view.DrawText(c.x, c.y, c.x+c.width-1, c.y+c.height-1, tcell.StyleDefault, c.content.Data())
+	c.clearView()
+	c.content = content
+	if c.content != nil {
+		c.view.DrawText(c.x, c.y, c.x+c.width-1, c.y+c.height-1, tcell.StyleDefault, c.content.Data())
+	}
 }
 
 func (c *ContentView) Clear() {
+	if c.content == nil {
+		return
+	}
+	c.clearView()
+}
+
+func (c *ContentView) clearView() {
 	c.view.ClearArea(c.x, c.y, c.width, c.height)
 }

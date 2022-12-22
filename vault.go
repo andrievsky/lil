@@ -47,7 +47,13 @@ func parseList(stdout []byte, append func(localPath string)) error {
 }
 
 func (c *VaultClient) Get(path Path) (Content, error) {
-	return NewContent(path, "Content Data"), nil
+	cmd := exec.Command("vault", "kv", "get", path.GlobalPath())
+	stdout, err := cmd.Output()
+	exitErr, isExitError := err.(*exec.ExitError)
+	if isExitError {
+		return nil, errors.New(string(exitErr.Stderr))
+	}
+	return NewContent(path, string(stdout)), nil
 }
 
 func isFinal(path string) bool {
