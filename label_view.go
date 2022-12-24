@@ -27,7 +27,25 @@ func NewLabelView(view View, text string, selected bool, x, y, maxWidth int) *La
 
 }
 
+func (l *LabelView) TextAndSelect(text string, selected bool) {
+	if text == l.text {
+		l.Select(selected)
+		return
+	}
+	if selected == l.selected {
+		l.Text(text)
+		return
+	}
+	l.text = text
+	l.displayText = formatText(text, l.width)
+	l.selected = selected
+	l.update()
+}
+
 func (l *LabelView) Text(text string) {
+	if text == l.text {
+		return
+	}
 	l.text = text
 	l.displayText = formatText(text, l.width)
 	l.update()
@@ -44,9 +62,11 @@ func (l *LabelView) Select(selected bool) {
 func (l *LabelView) Clear() {
 	if l.selected {
 		l.view.ClearArea(l.x, l.y, l.width, l.height)
-		return
+	} else {
+		l.view.ClearArea(l.x, l.y, len(l.displayText), l.height)
 	}
-	l.view.ClearArea(l.x, l.y, len(l.displayText), l.height)
+	l.selected = false
+	l.text = ""
 }
 
 func (l *LabelView) update() {
