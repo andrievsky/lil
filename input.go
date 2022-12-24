@@ -17,6 +17,20 @@ const (
 	OnResize
 )
 
+const KeyInputOffset InputEvent = 256
+
+func (t InputEvent) HasKey() bool {
+	return t >= KeyInputOffset
+}
+
+func (t InputEvent) Key() rune {
+	return rune(t - KeyInputOffset)
+}
+
+func KeyInputEvent(key rune) InputEvent {
+	return InputEvent(key) + KeyInputOffset
+}
+
 type Input struct {
 	screen tcell.Screen
 }
@@ -52,10 +66,8 @@ func (i *Input) PoolEvent() InputEvent {
 			case tcell.KeyLeft, tcell.KeyBackspace, tcell.KeyBackspace2:
 				return GoBack
 			}
-			switch event.Rune() {
-			case 'q':
-				return GoQuit
-			}
+			key := event.Rune()
+			return KeyInputEvent(key)
 		}
 	}
 }

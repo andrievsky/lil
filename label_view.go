@@ -59,6 +59,11 @@ func (l *LabelView) Select(selected bool) {
 	l.update()
 }
 
+func (l *ListView) SelectKey(key rune) {
+	l.model.SelectKey(key)
+	l.sync()
+}
+
 func (l *LabelView) Clear() {
 	if l.selected {
 		l.view.ClearArea(l.x, l.y, l.width, l.height)

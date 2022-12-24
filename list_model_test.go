@@ -145,6 +145,19 @@ func TestSelectNextAfterLast(t *testing.T) {
 	assert.Equal(t, items[1:3], model.VisibleItems())
 }
 
+func TestSelectKey(t *testing.T) {
+	items := []Path{
+		buildPath("a"),
+		buildPath("b"),
+		buildPath("c"),
+	}
+	model, _ := NewListModel(items, 2)
+	model.SelectKey('b')
+	expected := items[1]
+	actual := model.Selected()
+	assert.Equal(t, expected, actual)
+}
+
 func buildPath(path string) Path {
 	return NewPath(nil, path, path, path, false)
 }

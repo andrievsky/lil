@@ -1,12 +1,16 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"time"
+)
 
 type ListModel struct {
 	Items             []Path
 	maxVisibleItems   int
 	firstVisibleIndex int
 	selectedIndex     int
+	finder            *Finder
 }
 
 func NewListModel(items []Path, maxVisibleItems int) (*ListModel, error) {
@@ -21,6 +25,7 @@ func NewListModel(items []Path, maxVisibleItems int) (*ListModel, error) {
 		maxVisibleItems,
 		0,
 		0,
+		NewFinder(time.Second, time.Now),
 	}, nil
 }
 
@@ -63,6 +68,10 @@ func (l *ListModel) VisibleSelectedIndex() int {
 func (l *ListModel) VisibleItems() []Path {
 	last := l.lastVisibleIndex()
 	return l.Items[l.firstVisibleIndex : last+1]
+}
+
+func (l *ListModel) SelectKey(key rune) {
+	l.Select(l.finder.Find(l.Items, key))
 }
 
 func (l *ListModel) lastVisibleIndex() int {

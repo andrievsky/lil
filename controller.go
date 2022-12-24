@@ -38,7 +38,8 @@ func (c *Controller) Run() error {
 	for {
 		c.preview(c.display.list.Selected())
 		c.view.Render()
-		switch c.input.PoolEvent() {
+		event := c.input.PoolEvent()
+		switch event {
 		case OnResize:
 			c.view.RenderAll()
 			break
@@ -71,6 +72,12 @@ func (c *Controller) Run() error {
 				return err
 			}
 			break
+		default:
+			{
+				if event.HasKey() {
+					c.display.list.SelectKey(event.Key())
+				}
+			}
 		}
 	}
 }
