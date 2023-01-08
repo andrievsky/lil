@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"sync"
 	"time"
 )
 
@@ -21,6 +22,7 @@ type Controller struct {
 	currentPath   Path
 	cachedList    map[Path][]Path
 	cachedContent map[Path]Content
+	lock          sync.RWMutex
 }
 
 func NewController(input Input, view View, client Client) *Controller {
@@ -31,7 +33,9 @@ func NewController(input Input, view View, client Client) *Controller {
 		NewDisplay(view),
 		nil,
 		make(map[Path][]Path),
-		make(map[Path]Content)}
+		make(map[Path]Content),
+		sync.RWMutex{},
+	}
 }
 
 func (c *Controller) Run() error {
@@ -113,19 +117,17 @@ func (c *Controller) list(path Path) error {
 	c.status("Loading...")
 	c.view.Render()
 	startTime := time.Now()
-	list, cached := c.cachedList[path]
-	if !cached {
-		var err error
-		list, err = c.client.List(path)
-		if err != nil {
-			return err
-		}
-		c.cachedList[path] = list
+	list, err := c.loadList(path)
+	if err != nil {
+		return err
+	}
+	if err := c.preloadAllItems(list); err != nil {
+		return err
 	}
 	loadingTime := time.Now().Sub(startTime)
 	c.currentPath = path
 	c.display.list.Items(list)
-	c.status("Loaded %s %s in %s", path.Path(), optionalText(cached, "from cache", ""), FormatEscapedTime(loadingTime))
+	c.status("Loaded %s in %s", path.Path(), FormatEscapedTime(loadingTime))
 	return nil
 }
 
@@ -133,18 +135,13 @@ func (c *Controller) content(path Path) error {
 	c.status("Loading...")
 	c.view.Render()
 	startTime := time.Now()
-	content, cached := c.cachedContent[path]
-	if !cached {
-		var err error
-		content, err = c.client.Get(path)
-		if err != nil {
-			return err
-		}
-		c.cachedContent[path] = content
+	content, err := c.loadContent(path)
+	if err != nil {
+		return err
 	}
 	loadingTime := time.Now().Sub(startTime)
 	c.display.content.Set(content)
-	c.status("Loaded %s %s in %s", path.Path(), optionalText(cached, "from cache", ""), FormatEscapedTime(loadingTime))
+	c.status("Loaded %s in %s", path.Path(), FormatEscapedTime(loadingTime))
 	return nil
 }
 
@@ -171,6 +168,63 @@ func (c *Controller) preview(path Path) {
 	}
 	c.display.content.Set(EmptyPreview)
 	return
+}
+
+func (c *Controller) loadList(path Path) ([]Path, error) {
+	c.lock.RLock()
+	list, cached := c.cachedList[path]
+	c.lock.RUnlock()
+	if !cached {
+		var err error
+		list, err = c.client.List(path)
+		if err != nil {
+			return nil, err
+		}
+		c.lock.Lock()
+		c.cachedList[path] = list
+		c.lock.Unlock()
+	}
+	return list, nil
+}
+
+func (c *Controller) loadContent(path Path) (Content, error) {
+	c.lock.RLock()
+	content, cached := c.cachedContent[path]
+	c.lock.RUnlock()
+	if !cached {
+		var err error
+		content, err = c.client.Get(path)
+		if err != nil {
+			return nil, err
+		}
+		c.lock.Lock()
+		c.cachedContent[path] = content
+		c.lock.Unlock()
+	}
+	return content, nil
+}
+
+func (c *Controller) preloadAllItems(list []Path) error {
+	var tasks []func() error
+
+	for _, path := range list {
+		var p = path
+		if path.Final() {
+			tasks = append(tasks, func() error {
+				_, err := c.loadContent(p)
+				return err
+			})
+			continue
+		}
+		tasks = append(tasks, func() error {
+			_, err := c.loadList(p)
+			return err
+		})
+	}
+	return ExecuteInParallel(tasks, 50, func(complete, total int) {
+		c.status("Loading %d/%d", complete, total)
+		c.view.Render()
+	})
 }
 
 func listContent(path Path, list []Path) Content {
