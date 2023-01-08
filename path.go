@@ -2,26 +2,23 @@ package main
 
 type Path interface {
 	Parent() Path
-	LocalPath() string
-	GlobalPath() string
+	Path() string
 	Label() string
 	Final() bool
 	HasParent() bool
 }
 
 type PathImpl struct {
-	parent     Path
-	localPath  string
-	globalPath string
-	label      string
-	final      bool
+	parent Path
+	path   string
+	label  string
+	final  bool
 }
 
-func NewPath(parent Path, localPath, globalPath, label string, final bool) Path {
+func NewPath(parent Path, path, label string, final bool) Path {
 	return &PathImpl{
 		parent,
-		localPath,
-		globalPath,
+		path,
 		label,
 		final,
 	}
@@ -31,12 +28,8 @@ func (p *PathImpl) Parent() Path {
 	return p.parent
 }
 
-func (p *PathImpl) LocalPath() string {
-	return p.localPath
-}
-
-func (p *PathImpl) GlobalPath() string {
-	return p.globalPath
+func (p *PathImpl) Path() string {
+	return p.path
 }
 
 func (p *PathImpl) Label() string {

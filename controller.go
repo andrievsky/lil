@@ -32,7 +32,11 @@ func NewController(input *Input, view View, client Client) *Controller {
 }
 
 func (c *Controller) Run() error {
-	if err := c.list(c.client.RootPath()); err != nil {
+	rootPath, err := c.client.Init()
+	if err != nil {
+		return err
+	}
+	if err = c.list(rootPath); err != nil {
 		return err
 	}
 	for {
@@ -92,7 +96,7 @@ func (c *Controller) open(path Path) error {
 
 func (c *Controller) back(path Path) error {
 	if !path.HasParent() {
-		c.status("Path %s has no parent", path.GlobalPath())
+		c.status("Path %s has no parent", path.Path())
 		return nil
 	}
 	return c.open(path.Parent())
@@ -114,7 +118,7 @@ func (c *Controller) list(path Path) error {
 	loadingTime := time.Now().Sub(startTime)
 	c.currentPath = path
 	c.display.list.Items(list)
-	c.status("Loaded %s %s in %s", path.GlobalPath(), optionalText(cached, "from cache", ""), FormatEscapedTime(loadingTime))
+	c.status("Loaded %s %s in %s", path.Path(), optionalText(cached, "from cache", ""), FormatEscapedTime(loadingTime))
 	return nil
 }
 
@@ -133,7 +137,7 @@ func (c *Controller) content(path Path) error {
 	}
 	loadingTime := time.Now().Sub(startTime)
 	c.display.content.Set(content)
-	c.status("Loaded %s %s in %s", path.GlobalPath(), optionalText(cached, "from cache", ""), FormatEscapedTime(loadingTime))
+	c.status("Loaded %s %s in %s", path.Path(), optionalText(cached, "from cache", ""), FormatEscapedTime(loadingTime))
 	return nil
 }
 
@@ -145,7 +149,7 @@ func (c *Controller) selectNext(offset int) {
 	c.display.list.SelectNext(offset)
 	selectedPath := c.display.list.Selected()
 	if selectedPath != nil {
-		c.status("Selected %s", c.display.list.Selected().GlobalPath())
+		c.status("Selected %s", c.display.list.Selected().Path())
 	}
 }
 

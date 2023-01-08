@@ -16,7 +16,7 @@ func NewVaultClient(rootPath string) (*VaultClient, error) {
 }
 
 func (c *VaultClient) List(path Path) ([]Path, error) {
-	cmd := exec.Command("vault", "kv", "list", path.GlobalPath())
+	cmd := exec.Command("vault", "kv", "list", path.Path())
 	stdout, err := cmd.Output()
 	exitErr, isExitError := err.(*exec.ExitError)
 	if isExitError {
@@ -25,7 +25,7 @@ func (c *VaultClient) List(path Path) ([]Path, error) {
 
 	list := make([]Path, 0)
 	err = parseList(stdout, func(localPath string) {
-		list = append(list, NewPath(path, localPath, path.GlobalPath()+localPath, localPath, isFinal(localPath)))
+		list = append(list, NewPath(path, path.Path()+localPath, localPath, isFinal(localPath)))
 	})
 	if err != nil {
 		return nil, err
@@ -47,7 +47,7 @@ func parseList(stdout []byte, append func(localPath string)) error {
 }
 
 func (c *VaultClient) Get(path Path) (Content, error) {
-	cmd := exec.Command("vault", "kv", "get", path.GlobalPath())
+	cmd := exec.Command("vault", "kv", "get", path.Path())
 	stdout, err := cmd.Output()
 	exitErr, isExitError := err.(*exec.ExitError)
 	if isExitError {
@@ -61,5 +61,5 @@ func isFinal(path string) bool {
 }
 
 func (c *VaultClient) RootPath() Path {
-	return NewPath(nil, c.rootPath, c.rootPath, c.rootPath, false)
+	return NewPath(nil, c.rootPath, c.rootPath, false)
 }

@@ -10,17 +10,10 @@ import (
 	"syscall"
 )
 
-type Client interface {
-	RootPath() Path
-	List(Path) ([]Path, error)
-	Get(Path) (Content, error)
-}
+const homePath = "/.lil"
 
 func main() {
-	client, err := buildClient()
-	if err != nil {
-		panic("Can't read config: " + err.Error())
-	}
+
 	screen, err := initScreen()
 
 	if err != nil {
@@ -52,6 +45,12 @@ func main() {
 
 	view := NewView(screen)
 	input := NewInput(screen)
+
+	client, err := selectClient(input, view)
+	if err != nil {
+		panic("Can't read config: " + err.Error())
+	}
+
 	controller := NewController(input, view, client)
 	err = controller.Run()
 }
@@ -69,7 +68,11 @@ func initScreen() (tcell.Screen, error) {
 	return screen, nil
 }
 
-func buildClient() (Client, error) {
-	client, err := NewVaultClient("secret/")
-	return client, err
+func selectClient(input *Input, view View) (Client, error) {
+	userHome, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+	controller := NewClientController(input, view, userHome+homePath)
+	return controller.Pick()
 }
