@@ -6,15 +6,15 @@ import (
 	"os"
 )
 
-type ClientController struct {
+type ClientListController struct {
 	input   Input
 	view    View
 	display *Display
 	path    string
 }
 
-func NewClientController(input Input, view View, path string) *ClientController {
-	return &ClientController{
+func NewClientListController(input Input, view View, path string) *ClientListController {
+	return &ClientListController{
 		input,
 		view,
 		NewDisplay(view),
@@ -22,7 +22,7 @@ func NewClientController(input Input, view View, path string) *ClientController 
 	}
 }
 
-func (c *ClientController) Pick() (Client, error) {
+func (c *ClientListController) Run() (Client, error) {
 	clientList, err := listClients(c.path)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (c *ClientController) Pick() (Client, error) {
 			c.view.RenderAll()
 			break
 		case GoQuit:
-			return nil, nil
+			return nil, Quit
 		case GoUp:
 			c.selectNext(-1)
 			break
@@ -58,7 +58,8 @@ func (c *ClientController) Pick() (Client, error) {
 			c.selectNext(pageSize)
 		case GoForward:
 			selectedPath := c.display.list.Selected()
-			return NewCmdClient(selectedPath.Label(), selectedPath.Path())
+			client, err := NewCmdClient(selectedPath.Label(), selectedPath.Path())
+			return client, err
 		default:
 			{
 				if event.HasKey() {
@@ -69,7 +70,7 @@ func (c *ClientController) Pick() (Client, error) {
 	}
 }
 
-func (c *ClientController) selectNext(offset int) {
+func (c *ClientListController) selectNext(offset int) {
 	c.display.list.SelectNext(offset)
 	selectedPath := c.display.list.Selected()
 	if selectedPath != nil {

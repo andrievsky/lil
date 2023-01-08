@@ -1,12 +1,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"time"
 )
 
 const pageSize = 25
+
+var Quit = errors.New("interrupted by user")
 
 var EmptyPreview = NewContent(nil, "All loaded items are cached and preview automatically\n\nUse arrow keys to navigate\nEnter to open\nBackspace to go back\nQ to quit")
 
@@ -48,7 +51,7 @@ func (c *Controller) Run() error {
 			c.view.RenderAll()
 			break
 		case GoQuit:
-			return nil
+			return Quit
 		case GoUp:
 			c.selectNext(-1)
 			break
@@ -72,8 +75,12 @@ func (c *Controller) Run() error {
 			}
 			c.selectNext(0)
 		case GoBack:
-			if err := c.back(c.currentPath); err != nil {
+			done, err := c.back(c.currentPath)
+			if err != nil {
 				return err
+			}
+			if done {
+				return nil
 			}
 			break
 		default:
@@ -94,12 +101,12 @@ func (c *Controller) open(path Path) error {
 	return c.list(path)
 }
 
-func (c *Controller) back(path Path) error {
+func (c *Controller) back(path Path) (bool, error) {
 	if !path.HasParent() {
 		c.status("Path %s has no parent", path.Path())
-		return nil
+		return true, nil
 	}
-	return c.open(path.Parent())
+	return false, c.open(path.Parent())
 }
 
 func (c *Controller) list(path Path) error {

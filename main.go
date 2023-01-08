@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gdamore/tcell/v2"
 	"log"
@@ -21,7 +22,7 @@ func main() {
 	}
 
 	var once sync.Once
-	close := func() {
+	gracefulClose := func() {
 		once.Do(func() {
 			screen.Fini()
 		})
@@ -31,28 +32,42 @@ func main() {
 		sigChan := make(chan os.Signal, 1)
 		signal.Notify(sigChan, os.Interrupt, os.Kill, syscall.SIGTERM)
 		<-sigChan
-		close()
+		gracefulClose()
 		os.Exit(0)
 	}()
 
 	defer func() {
 		if err != nil {
+			if errors.Is(err, Quit) {
+				return
+			}
 			log.Println("Exit with error: " + err.Error())
 			os.Exit(1)
 		}
 	}()
-	defer close()
+	defer gracefulClose()
 
 	view := NewView(screen)
 	input := NewKeyboardInput(screen)
 
-	client, err := selectClient(input, view)
-	if err != nil {
-		panic("Can't read config: " + err.Error())
+	for {
+		var userHome string
+		userHome, err = os.UserHomeDir()
+		if err != nil {
+			return
+		}
+		clientListController := NewClientListController(input, view, userHome+homePath)
+		var client Client
+		client, err = clientListController.Run()
+		if err != nil {
+			return
+		}
+		controller := NewController(input, view, client)
+		err = controller.Run()
+		if err != nil {
+			return
+		}
 	}
-
-	controller := NewController(input, view, client)
-	err = controller.Run()
 }
 
 func initScreen() (tcell.Screen, error) {
@@ -66,13 +81,4 @@ func initScreen() (tcell.Screen, error) {
 	}
 	screen.Clear()
 	return screen, nil
-}
-
-func selectClient(input Input, view View) (Client, error) {
-	userHome, err := os.UserHomeDir()
-	if err != nil {
-		return nil, err
-	}
-	controller := NewClientController(input, view, userHome+homePath)
-	return controller.Pick()
 }
