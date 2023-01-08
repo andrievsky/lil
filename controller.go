@@ -11,7 +11,7 @@ const pageSize = 25
 var EmptyPreview = NewContent(nil, "All loaded items are cached and preview automatically\n\nUse arrow keys to navigate\nEnter to open\nBackspace to go back\nQ to quit")
 
 type Controller struct {
-	input         *Input
+	input         Input
 	view          View
 	client        Client
 	display       *Display
@@ -20,7 +20,7 @@ type Controller struct {
 	cachedContent map[Path]Content
 }
 
-func NewController(input *Input, view View, client Client) *Controller {
+func NewController(input Input, view View, client Client) *Controller {
 	return &Controller{
 		input,
 		view,

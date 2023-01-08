@@ -31,17 +31,21 @@ func KeyInputEvent(key rune) InputEvent {
 	return InputEvent(key) + KeyInputOffset
 }
 
-type Input struct {
+type Input interface {
+	PoolEvent() InputEvent
+}
+
+type KeyboardInput struct {
 	screen tcell.Screen
 }
 
-func NewInput(screen tcell.Screen) *Input {
-	return &Input{screen}
+func NewKeyboardInput(screen tcell.Screen) Input {
+	return &KeyboardInput{screen}
 }
 
-func (i *Input) PoolEvent() InputEvent {
+func (t *KeyboardInput) PoolEvent() InputEvent {
 	for {
-		event := i.screen.PollEvent()
+		event := t.screen.PollEvent()
 		switch event := event.(type) {
 		case *tcell.EventResize:
 			return OnResize

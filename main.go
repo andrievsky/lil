@@ -44,7 +44,7 @@ func main() {
 	defer close()
 
 	view := NewView(screen)
-	input := NewInput(screen)
+	input := NewKeyboardInput(screen)
 
 	client, err := selectClient(input, view)
 	if err != nil {
@@ -68,7 +68,7 @@ func initScreen() (tcell.Screen, error) {
 	return screen, nil
 }
 
-func selectClient(input *Input, view View) (Client, error) {
+func selectClient(input Input, view View) (Client, error) {
 	userHome, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err

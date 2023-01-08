@@ -7,13 +7,13 @@ import (
 )
 
 type ClientController struct {
-	input   *Input
+	input   Input
 	view    View
 	display *Display
 	path    string
 }
 
-func NewClientController(input *Input, view View, path string) *ClientController {
+func NewClientController(input Input, view View, path string) *ClientController {
 	return &ClientController{
 		input,
 		view,
