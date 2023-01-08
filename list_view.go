@@ -4,8 +4,9 @@ type ListView struct {
 	view View
 	ViewPosition
 	ViewSize
-	views []*LabelView
-	model *ListModel
+	views          []*LabelView
+	emptyListLabel *LabelView
+	model          *ListModel
 }
 
 func NewListView(view View, x, y, width, height int) *ListView {
@@ -14,18 +15,20 @@ func NewListView(view View, x, y, width, height int) *ListView {
 		ViewPosition{x, y},
 		ViewSize{width, height},
 		buildViews(view, x, y, width, height),
-		nil,
+		NewLabelView(view, "", false, x, y, width),
+		NewListModel([]Path{}, 0),
 	}
 }
 
 func (l *ListView) Items(list []Path) error {
 	l.Clear()
-	model, err := NewListModel(list, l.height)
-	if err != nil {
-		return err
-	}
-	l.model = model
+	l.model = NewListModel(list, l.height)
 	l.sync()
+	if len(list) == 0 {
+		l.emptyListLabel.TextAndSelect("No items", false)
+	} else {
+		l.emptyListLabel.Clear()
+	}
 	return nil
 }
 

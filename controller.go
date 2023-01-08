@@ -9,6 +9,7 @@ import (
 )
 
 const pageSize = 25
+const parallelExecutionLimit = 50
 
 var Quit = errors.New("interrupted by user")
 
@@ -158,6 +159,9 @@ func (c *Controller) selectNext(offset int) {
 }
 
 func (c *Controller) preview(path Path) {
+	if path == nil {
+		return
+	}
 	if content := c.cachedContent[path]; content != nil {
 		c.display.content.Set(content)
 		return
@@ -221,7 +225,7 @@ func (c *Controller) preloadAllItems(list []Path) error {
 			return err
 		})
 	}
-	return ExecuteInParallel(tasks, 50, func(complete, total int) {
+	return ExecuteInParallel(tasks, parallelExecutionLimit, func(complete, total int) {
 		c.status("Loading %d/%d", complete, total)
 		c.view.Render()
 	})

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"time"
 )
 
@@ -13,20 +12,14 @@ type ListModel struct {
 	finder            *Finder
 }
 
-func NewListModel(items []Path, maxVisibleItems int) (*ListModel, error) {
-	if len(items) < 1 {
-		return nil, errors.New("items must contain at least one item")
-	}
-	if maxVisibleItems < 1 {
-		return nil, errors.New("maxVisibleItems must be greater than zero")
-	}
+func NewListModel(items []Path, maxVisibleItems int) *ListModel {
 	return &ListModel{
 		items,
 		maxVisibleItems,
 		0,
 		0,
 		NewFinder(time.Second, time.Now),
-	}, nil
+	}
 }
 
 func (l *ListModel) Select(index int) {
@@ -54,7 +47,10 @@ func (l *ListModel) SelectNext(offset int) {
 }
 
 func (l *ListModel) Selected() Path {
-	return l.Items[l.selectedIndex]
+	if l.SelectedIndex() < 0 || l.SelectedIndex() >= len(l.Items) {
+		return nil
+	}
+	return l.Items[l.SelectedIndex()]
 }
 
 func (l *ListModel) SelectedIndex() int {
