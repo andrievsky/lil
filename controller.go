@@ -88,6 +88,11 @@ func (c *Controller) Run() error {
 				return nil
 			}
 			break
+		case OnRefresh:
+			if err := c.refresh(); err != nil {
+				return err
+			}
+			break
 		default:
 			{
 				if event.HasKey() {
@@ -144,6 +149,22 @@ func (c *Controller) content(path Path) error {
 	c.display.content.Set(content)
 	c.status("Loaded %s in %s", path.Path(), FormatEscapedTime(loadingTime))
 	return nil
+}
+
+func (c *Controller) refresh() error {
+	c.invalidate(c.currentPath)
+	return c.list(c.currentPath)
+}
+
+func (c *Controller) invalidate(path Path) {
+	list, hasList := c.cachedList[path]
+	if hasList {
+		for _, item := range list {
+			c.invalidate(item)
+		}
+		delete(c.cachedList, path)
+	}
+	delete(c.cachedContent, path)
 }
 
 func (c *Controller) status(msg string, a ...any) {

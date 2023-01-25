@@ -15,6 +15,7 @@ const (
 	GoBack
 	GoQuit
 	OnResize
+	OnRefresh
 )
 
 const KeyInputOffset InputEvent = 256
@@ -69,6 +70,8 @@ func (t *KeyboardInput) PoolEvent() InputEvent {
 				return GoForward
 			case tcell.KeyLeft, tcell.KeyBackspace, tcell.KeyBackspace2:
 				return GoBack
+			case tcell.KeyCtrlR:
+				return OnRefresh
 			}
 			key := event.Rune()
 			return KeyInputEvent(key)
