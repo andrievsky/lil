@@ -2,6 +2,8 @@
 
 Welcome to lil TUI, a lightweight terminal user interface (TUI) application designed to provide a seamless, generic interface for any service that supports list and get operations.
 
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+
 ## Features
 User-friendly terminal interface
 Easily configurable for a variety of services
