@@ -9,7 +9,7 @@ Simple plug-and-play setup
 
 
 ## Demo
-![Demo](https://github.com/andrievsky/lil/raw/master/docs/demo.gif "Demo")
+![Demo](https://github.com/andrievsky/lil/raw/main/docs/demo.gif "Demo")
 
 ## Configuration
 To connect a new service to lil, follow these steps:
