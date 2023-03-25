@@ -9,7 +9,9 @@ Simple plug-and-play setup
 
 
 ## Demo
-![Demo](https://github.com/andrievsky/lil/raw/main/docs/demo.gif "Demo")
+[![The very first lil TUI demo]
+(https://i.ytimg.com/vi/DcNT4jeCZ9k/maxresdefault.jpg)]
+(https://youtu.be/DcNT4jeCZ9k "The very first lil TUI demo")
 
 ## Configuration
 To connect a new service to lil, follow these steps:
