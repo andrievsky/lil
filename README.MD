@@ -9,9 +9,7 @@ Simple plug-and-play setup
 
 
 ## Demo
-[![The very first lil TUI demo]
-(https://i.ytimg.com/vi/DcNT4jeCZ9k/maxresdefault.jpg)]
-(https://www.youtube.com/watch?v=DcNT4jeCZ9k "The very first lil TUI demo")
+[![The very first lil TUI demo](https://i.ytimg.com/vi/DcNT4jeCZ9k/maxresdefault.jpg)](https://www.youtube.com/watch?v=DcNT4jeCZ9k "The very first lil TUI demo")
 
 ## Configuration
 To connect a new service to lil, follow these steps:
